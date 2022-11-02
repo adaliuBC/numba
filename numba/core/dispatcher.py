@@ -812,7 +812,7 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         py_func: function object to be compiled
         locals: dict, optional
             Mapping of local variable names to Numba types.  Used to override
-            the types deduced by the type inference engine.
+            the types deduced by the type inference engine. ???
         targetoptions: dict, optional
             Target-specific config options.
         impl_kind: str
@@ -823,10 +823,12 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         self.typingctx = self.targetdescr.typing_context
         self.targetctx = self.targetdescr.target_context
 
+        # number of signature sets
         pysig = utils.pysignature(py_func)
         arg_count = len(pysig.parameters)
         can_fallback = not targetoptions.get('nopython', False)
 
+        # ?
         _DispatcherBase.__init__(self, arg_count, py_func, pysig, can_fallback,
                                  exact_match_required=False)
 

@@ -73,7 +73,7 @@ class CPUDispatcher(dispatcher.Dispatcher):
     targetdescr = cpu_target
 
 
-class DelayedRegistry(utils.UniqueDict):
+class DelayedRegistry(utils.UniqueDict):  # UniqueDict就是个不允许重复key的dict
     """
     A unique dictionary but with deferred initialisation of the values.
 
@@ -87,7 +87,7 @@ class DelayedRegistry(utils.UniqueDict):
     """
     def __init__(self, *args, **kws):
         self.ondemand = utils.UniqueDict()
-        self.key_type = kws.pop('key_type', None)
+        self.key_type = kws.pop('key_type', None)  # key_type is target hw ex. "CPU"
         self.value_type = kws.pop('value_type', None)
         self._type_check = self.key_type or self.value_type
         super(DelayedRegistry, self).__init__(*args, **kws)

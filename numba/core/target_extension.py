@@ -3,6 +3,7 @@ from numba.core.registry import DelayedRegistry, CPUDispatcher
 from numba.core.decorators import jit
 from numba.core.errors import InternalTargetMismatchError, NumbaValueError
 from threading import local as tls
+import pdb
 
 
 _active_context = tls()
@@ -159,10 +160,10 @@ target_registry['CUDA'] = CUDA
 target_registry['cuda'] = CUDA
 target_registry['npyufunc'] = NPyUfunc
 
-dispatcher_registry = DelayedRegistry(key_type=Target)
+dispatcher_registry = DelayedRegistry(key_type=Target)  # 就是个dict存了几个target hw的名字？
 
 
 # Register the cpu target token with its dispatcher and jit
-cpu_target = target_registry['cpu']
-dispatcher_registry[cpu_target] = CPUDispatcher
+cpu_target = target_registry['cpu']  # == CPU class
+dispatcher_registry[cpu_target] = CPUDispatcher  # dispatcher_registry[CPU(class)] = CPUDispatcher(class)
 jit_registry[cpu_target] = jit

@@ -11,6 +11,7 @@ import logging
 from numba.core.errors import DeprecationError, NumbaDeprecationWarning
 from numba.stencils.stencil import stencil
 from numba.core import config, extending, sigutils, registry
+import pdb
 
 _logger = logging.getLogger(__name__)
 
@@ -152,7 +153,7 @@ def jit(signature_or_function=None, locals={}, cache=False,
 
     options['boundscheck'] = boundscheck
 
-    # Handle signature
+    # Handle signature, 如果有，就存下来
     if signature_or_function is None:
         # No signature, no function
         pyfunc = None
@@ -205,17 +206,19 @@ def _jit(sigs, locals, target, cache, targetoptions, **dispatcher_args):
             return cuda.jit(func)
         if config.DISABLE_JIT and not target == 'npyufunc':
             return func
+        # def dispatcher with 给定的target ("CPU", "GPU", "CUDA", etc.)
+        pdb.set_trace()
         disp = dispatcher(py_func=func, locals=locals,
                           targetoptions=targetoptions,
-                          **dispatcher_args)
+                          **dispatcher_args)  # goto dispatcher.py:807 (class Dispatcher)
         if cache:
             disp.enable_caching()
         if sigs is not None:
             # Register the Dispatcher to the type inference mechanism,
             # even though the decorator hasn't returned yet.
-            from numba.core import typeinfer
-            with typeinfer.register_dispatcher(disp):
-                for sig in sigs:
+            from numba.core import typeinfer  # type infer is file name
+            with typeinfer.register_dispatcher(disp):  # ?
+                for sig in sigs:  # 对于每个signature，都compile一个dispatcher
                     disp.compile(sig)
                 disp.disable_compile()
         return disp
