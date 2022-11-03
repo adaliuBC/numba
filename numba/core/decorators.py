@@ -207,7 +207,6 @@ def _jit(sigs, locals, target, cache, targetoptions, **dispatcher_args):
         if config.DISABLE_JIT and not target == 'npyufunc':
             return func
         # def dispatcher with 给定的target ("CPU", "GPU", "CUDA", etc.)
-        pdb.set_trace()
         disp = dispatcher(py_func=func, locals=locals,
                           targetoptions=targetoptions,
                           **dispatcher_args)  # goto dispatcher.py:807 (class Dispatcher)

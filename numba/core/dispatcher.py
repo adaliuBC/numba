@@ -7,6 +7,7 @@ import sys
 import types as pytypes
 import uuid
 import weakref
+import pdb
 from contextlib import ExitStack
 
 from numba import _dispatcher
@@ -840,7 +841,8 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         compiler_class = self._impl_kinds[impl_kind]
         self._impl_kind = impl_kind
         self._compiler = compiler_class(py_func, self.targetdescr,
-                                        targetoptions, locals, pipeline_class)
+                                        targetoptions, locals, pipeline_class)  # set compiler dispatcher.py:88
+        # ? 这个class明明叫_FunctionCompiler，call compiler_class为什么会调用到？
         self._cache_hits = collections.Counter()
         self._cache_misses = collections.Counter()
 
@@ -915,9 +917,10 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         return self
 
     def compile(self, sig):
+        pdb.set_trace()
         disp = self._get_dispatcher_for_current_target()
-        if disp is not self:
-            return disp.compile(sig)
+        if disp is not self:  # have a given target, then compile with dispatcher
+            return disp.compile(sig)  # ?
 
         with ExitStack() as scope:
             cres = None
@@ -1066,7 +1069,7 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         `TargetConfigurationStack`. `self` is returned if no target is
         specified.
         """
-        tc = TargetConfigurationStack()
+        tc = TargetConfigurationStack()  # ?
         if tc:
             return self._get_retarget_dispatcher()
         else:
