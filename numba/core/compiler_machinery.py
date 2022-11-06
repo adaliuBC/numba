@@ -202,7 +202,7 @@ class PassManager(object):
         """
         Append a pass to the PassManager's compilation pipeline
         """
-        self._validate_pass(pss)
+        self._validate_pass(pss)  # check pass is right
         func_desc_tuple = (pss, description)
         self.passes.append(func_desc_tuple)
         self._finalized = False
@@ -263,7 +263,7 @@ class PassManager(object):
         """
         newmsg = "{desc}\n{exc}".format(desc=desc, exc=exc)
         exc.args = (newmsg,)
-        return exc
+        return exc  # patch: 补丁
 
     @global_compiler_lock  # this need a lock, likely calls LLVM
     def _runPass(self, index, pss, internal_state):
@@ -363,7 +363,7 @@ class PassManager(object):
                         isinstance(e, errors.NumbaError)):
                     raise e
                 msg = "Failed in %s mode pipeline (step: %s)" % \
-                    (self.pipeline_name, pass_desc)
+                    (self.pipeline_name, pass_desc)  # :265
                 patched_exception = self._patch_error(msg, e)
                 raise patched_exception
 

@@ -61,11 +61,11 @@ class ExtractByteCode(FunctionPass):
         Extract bytecode from function
         """
         func_id = state['func_id']
-        bc = bytecode.ByteCode(func_id)
+        bc = bytecode.ByteCode(func_id)  # bytecode.py:206
         if config.DUMP_BYTECODE:
-            print(bc.dump())
+            print(bc.dump())  # 如果config设为打印code
 
-        state['bc'] = bc
+        state['bc'] = bc  # ByteCode obj，含当前目标func的所有bytecode
         return True
 
 

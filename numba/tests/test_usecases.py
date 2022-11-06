@@ -1,4 +1,5 @@
 import itertools
+import pdb
 import numpy as np
 
 import unittest
@@ -29,8 +30,9 @@ class TestUsecases(TestCase):
             self.assertEqual(pyfunc(*args), cfunc(*args), "args %s" % (args,))
 
     def test_sum1d(self):
+        pdb.set_trace()
         pyfunc = usecases.sum1d
-        cr = compile_isolated(pyfunc, (types.int32, types.int32))
+        cr = compile_isolated(pyfunc, (types.int32, types.int32))  # compiler.py: 297
         cfunc = cr.entry_point
 
         ss = -1, 0, 1, 100, 200

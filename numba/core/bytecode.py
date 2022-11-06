@@ -21,6 +21,7 @@ def get_function_object(obj):
     that contains a name of an attribute that contains the actual python
     function object.
     """
+    # 有wrapper就返回unwrapped的func，没有就返回obj本身，总之就是返回func obj
     attr = getattr(obj, "__numba__", None)
     if attr:
         return getattr(obj, attr)
@@ -210,12 +211,12 @@ class ByteCode(object):
         labels.add(0)
 
         # A map of {offset: ByteCodeInst}
-        table = OrderedDict(ByteCodeIter(code))
-        self._compute_lineno(table, code)
+        table = OrderedDict(ByteCodeIter(code))  # :174 遍历所有ByteCode，save offset:instruction as ordered dict
+        self._compute_lineno(table, code)  #  更新一下line no?
 
         self.func_id = func_id
         self.co_names = code.co_names
-        self.co_varnames = code.co_varnames
+        self.co_varnames = code.co_varnames  # 临时变量名字
         self.co_consts = code.co_consts
         self.co_cellvars = code.co_cellvars
         self.co_freevars = code.co_freevars
@@ -313,15 +314,15 @@ class FunctionIdentity(serialize.ReduceMixin):
         """
         Create the FunctionIdentity of the given function.
         """
-        func = get_function_object(pyfunc)
-        code = get_code_object(func)
-        pysig = utils.pysignature(func)
+        func = get_function_object(pyfunc)  # :18
+        code = get_code_object(func)  # :30, code object
+        pysig = utils.pysignature(func)  # (s, e) (i.e. input params)
         if not code:
             raise errors.ByteCodeSupportError(
                 "%s does not provide its bytecode" % func)
 
         try:
-            func_qualname = func.__qualname__
+            func_qualname = func.__qualname__  # sum1d
         except AttributeError:
             func_qualname = func.__name__
 

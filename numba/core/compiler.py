@@ -307,7 +307,7 @@ def compile_isolated(func, args, return_type=None, flags=DEFAULT_FLAGS,
     # Register the contexts in case for nested @jit or @overload calls
     with cpu_target.nested_context(typingctx, targetctx):
         return compile_extra(typingctx, targetctx, func, args, return_type,
-                             flags, locals)
+                             flags, locals)  # => :689 compile and run the pipeline
 
 
 def run_frontend(func, inline_closures=False, emit_dels=False):
@@ -444,12 +444,12 @@ class CompilerBase(object):
         )
 
     def compile_extra(self, func):
-        self.state.func_id = bytecode.FunctionIdentity.from_function(func)
-        ExtractByteCode().run_pass(self.state)
+        self.state.func_id = bytecode.FunctionIdentity.from_function(func)  # bytecode:py:311
+        ExtractByteCode().run_pass(self.state)  # -> untyped_passes:py:56 更新了self.state['bc']中存储的ByteCode obj
 
         self.state.lifted = ()
         self.state.lifted_from = None
-        return self._compile_bytecode()
+        return self._compile_bytecode()  # :515 compile and run pipeline (including passes)
 
     def compile_ir(self, func_ir, lifted=(), lifted_from=None):
         self.state.func_id = func_ir.func_id
@@ -470,8 +470,12 @@ class CompilerBase(object):
         """
         Populate and run compiler pipeline
         """
-        with ConfigStack().enter(self.state.flags.copy()):
-            pms = self.define_pipelines()
+        # Config() -> targetconfig.py:69 init ConfigStack
+        # self.state.flags.copy() -> targetconfig.py:240 just clone
+        # enter -> targetconfig.py:78 push curr state into the configStack
+        with ConfigStack().enter(self.state.flags.copy()):  # new a flag stack, push curr flags into it.
+            pms = self.define_pipelines()  # GOTO child class methods :537
+            # return pre-defined pipeline with either nopython or obj mode passes
             for pm in pms:
                 pipeline_name = pm.pipeline_name
                 func_name = "%s.%s" % (self.state.func_id.modname,
@@ -479,11 +483,11 @@ class CompilerBase(object):
 
                 event("Pipeline: %s for %s" % (pipeline_name, func_name))
                 self.state.metadata['pipeline_times'] = {pipeline_name:
-                                                         pm.exec_times}
+                                                         pm.exec_times}  # init time list
                 is_final_pipeline = pm == pms[-1]
                 res = None
                 try:
-                    pm.run(self.state)
+                    pm.run(self.state)  # compiler_machinery: 342 exec the passes
                     if self.state.cr is not None:
                         break
                 except _EarlyPipelineCompletion as e:
@@ -517,7 +521,7 @@ class CompilerBase(object):
         Populate and run pipeline for bytecode input
         """
         assert self.state.func_ir is None
-        return self._compile_core()
+        return self._compile_core()  # :469 create and run the pipeline (including passes)
 
     def _compile_ir(self):
         """
@@ -536,6 +540,7 @@ class Compiler(CompilerBase):
         pms = []
         if not self.state.flags.force_pyobject:
             pms.append(DefaultPassBuilder.define_nopython_pipeline(self.state))
+            # :561, add (typed, untyped, nopython) passes to current pipeline 
         if self.state.status.can_fallback or self.state.flags.force_pyobject:
             pms.append(
                 DefaultPassBuilder.define_objectmode_pipeline(self.state)
@@ -556,18 +561,20 @@ class DefaultPassBuilder(object):
     """
     @staticmethod
     def define_nopython_pipeline(state, name='nopython'):
-        """Returns an nopython mode pipeline based PassManager
+        """
+        Returns an nopython mode pipeline based PassManager
         """
         # compose pipeline from untyped, typed and lowering parts
         dpb = DefaultPassBuilder
-        pm = PassManager(name)
-        untyped_passes = dpb.define_untyped_pipeline(state)
-        pm.passes.extend(untyped_passes.passes)
+        pm = PassManager(name)  # compiler_machinery: 181
+        # init a named instance of a particular compilation pipeline
+        untyped_passes = dpb.define_untyped_pipeline(state)  # :621 add all untyped passes
+        pm.passes.extend(untyped_passes.passes)  # .extend(): add passes to pm.passes
 
-        typed_passes = dpb.define_typed_pipeline(state)
+        typed_passes = dpb.define_typed_pipeline(state)  # add typed passes
         pm.passes.extend(typed_passes.passes)
 
-        lowering_passes = dpb.define_nopython_lowering_pipeline(state)
+        lowering_passes = dpb.define_nopython_lowering_pipeline(state)  # add lowering passes
         pm.passes.extend(lowering_passes.passes)
 
         pm.finalize()
@@ -615,9 +622,11 @@ class DefaultPassBuilder(object):
     @staticmethod
     def define_untyped_pipeline(state, name='untyped'):
         """Returns an untyped part of the nopython pipeline"""
+        # add passes
         pm = PassManager(name)
         if state.func_ir is None:
             pm.add_pass(TranslateByteCode, "analyzing bytecode")
+            # add_pass -> compiler_machinery:201, add pass name as tuple to the pipeline
             pm.add_pass(FixupArgs, "fix up args")
         pm.add_pass(IRProcessing, "processing IR")
         pm.add_pass(WithLifting, "Handle with contexts")
@@ -652,7 +661,7 @@ class DefaultPassBuilder(object):
 
         pm.add_pass(LiteralPropagationSubPipelinePass, "Literal propagation")
 
-        pm.finalize()
+        pm.finalize()  # compiler_machinery: 246 the end of ading passes
         return pm
 
     @staticmethod
@@ -711,8 +720,11 @@ def compile_extra(typingctx, targetctx, func, args, return_type, flags,
         compiler pipeline
     """
     pipeline = pipeline_class(typingctx, targetctx, library,
-                              args, return_type, flags, locals)
-    return pipeline.compile_extra(func)
+                              args, return_type, flags, locals)  
+    # pipeline_class default = Compiler
+    # Compiler => CompilerBase => :404
+    # pipeline = Compiler obj
+    return pipeline.compile_extra(func)  # :452 compile and run the pipeline
 
 
 def compile_ir(typingctx, targetctx, func_ir, args, return_type, flags,

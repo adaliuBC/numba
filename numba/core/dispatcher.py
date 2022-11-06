@@ -917,7 +917,6 @@ class Dispatcher(serialize.ReduceMixin, _MemoMixin, _DispatcherBase):
         return self
 
     def compile(self, sig):
-        pdb.set_trace()
         disp = self._get_dispatcher_for_current_target()
         if disp is not self:  # have a given target, then compile with dispatcher
             return disp.compile(sig)  # ?

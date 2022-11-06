@@ -67,7 +67,7 @@ class ConfigStack:
         return flags
 
     def __init__(self):
-        self._stk = _FlagsStack()
+        self._stk = _FlagsStack()  # utils.py:215 build an empty stack for flags?
 
     def top(self):
         return self._stk.top()
