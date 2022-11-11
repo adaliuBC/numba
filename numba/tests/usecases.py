@@ -10,7 +10,6 @@ def sum1d(s, e):
         c += i
     return c
 
-
 def sum2d(s, e):
     c = 0
     for i in range(s, e):

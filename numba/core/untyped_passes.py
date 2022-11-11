@@ -49,7 +49,7 @@ def fallback_context(state, msg):
             raise
 
 
-@register_pass(mutates_CFG=True, analysis_only=False)
+@register_pass(mutates_CFG=True, analysis_only=False)  # compiler_machinery:409, register the pass in ?
 class ExtractByteCode(FunctionPass):
     _name = "extract_bytecode"
 
@@ -61,11 +61,11 @@ class ExtractByteCode(FunctionPass):
         Extract bytecode from function
         """
         func_id = state['func_id']
-        bc = bytecode.ByteCode(func_id)  # bytecode.py:206
+        bc = bytecode.ByteCode(func_id)  # bytecode.py:206, init Bytecode obj with all bytecode of curr func.
         if config.DUMP_BYTECODE:
             print(bc.dump())  # 如果config设为打印code
 
-        state['bc'] = bc  # ByteCode obj，含当前目标func的所有bytecode
+        state['bc'] = bc  # ByteCode obj with all bytecode of curr func.
         return True
 
 
@@ -82,8 +82,8 @@ class TranslateByteCode(FunctionPass):
         """
         func_id = state['func_id']
         bc = state['bc']
-        interp = interpreter.Interpreter(func_id)
-        func_ir = interp.interpret(bc)
+        interp = interpreter.Interpreter(func_id)  # interpreter.py:1280 init interpreter
+        func_ir = interp.interpret(bc)  # interpreter.py:1299
         state["func_ir"] = func_ir
         return True
 

@@ -30,7 +30,7 @@ class TestUsecases(TestCase):
             self.assertEqual(pyfunc(*args), cfunc(*args), "args %s" % (args,))
 
     def test_sum1d(self):
-        pdb.set_trace()
+        # pdb.set_trace()
         pyfunc = usecases.sum1d
         cr = compile_isolated(pyfunc, (types.int32, types.int32))  # compiler.py: 297
         cfunc = cr.entry_point

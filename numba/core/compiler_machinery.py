@@ -427,13 +427,13 @@ class PassRegistry(object):
         return make_festive
 
     def is_registered(self, clazz):
-        return clazz in self._registry.keys()
+        return clazz in self._registry.keys()  # check if already registered
 
     def get(self, clazz):
         assert self.is_registered(clazz)
         return self._registry[clazz]
 
-    def _does_pass_name_alias(self, check):
+    def _does_pass_name_alias(self, check):  # check if same pass registered with alias name
         for k, v in self._registry.items():
             if v.pass_inst.name == check:
                 return True
@@ -460,4 +460,4 @@ del PassRegistry
 register_pass is used to register a compiler pass class for use with PassManager
 instances.
 """
-register_pass = _pass_registry.register
+register_pass = _pass_registry.register  # register the pass in the 

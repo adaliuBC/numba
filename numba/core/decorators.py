@@ -139,6 +139,7 @@ def jit(signature_or_function=None, locals={}, cache=False,
                 return x + y
 
     """
+    # pdb.set_trace()
     if 'argtypes' in options:
         raise DeprecationError(_msg_deprecated_signature_arg.format('argtypes'))
     if 'restype' in options:

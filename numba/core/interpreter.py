@@ -4,6 +4,7 @@ import dis
 import operator
 import logging
 import textwrap
+import pdb
 
 from numba.core import errors, ir, config
 from numba.core.errors import NotDefinedError, UnsupportedError, error_extras
@@ -1300,6 +1301,7 @@ class Interpreter(object):
         """
         Generate IR for this bytecode.
         """
+        pdb.set_trace()
         self.bytecode = bytecode
 
         self.scopes = []
