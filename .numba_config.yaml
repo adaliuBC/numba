@@ -1,0 +1,5 @@
+dump_cfg: 1
+dump_ir: 1
+dump_annotation: 1
+dump_LLVM: 1
+dump_optimized: 1
