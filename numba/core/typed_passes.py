@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from collections import defaultdict, namedtuple
 from copy import copy
 import warnings
+import pdb
 
 from numba.core import (errors, types, typing, ir, funcdesc, rewrites,
                         typeinfer, config, lowering)
@@ -187,6 +188,7 @@ class AnnotateTypes(AnalysisPass):
         """
         Create type annotation after type inference
         """
+        # pdb.set_trace()
         func_ir = state.func_ir.copy()
         state.type_annotation = type_annotations.TypeAnnotation(
             func_ir=func_ir,

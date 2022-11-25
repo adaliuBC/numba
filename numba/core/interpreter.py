@@ -1301,15 +1301,16 @@ class Interpreter(object):
         """
         Generate IR for this bytecode.
         """
-        pdb.set_trace()
+        # pdb.set_trace()
         self.bytecode = bytecode
 
         self.scopes = []
+        # init obj for context
         global_scope = ir.Scope(parent=None, loc=self.loc)
         self.scopes.append(global_scope)
 
-        flow = Flow(bytecode)
-        flow.run()
+        flow = Flow(bytecode)  # Flow obj refers to control flow
+        flow.run()  # trace the controlflow by simulating execution
         self.dfa = AdaptDFA(flow)
         self.cfa = AdaptCFA(flow)
         if config.DUMP_CFG:
@@ -1332,9 +1333,9 @@ class Interpreter(object):
                                 self.arg_count, self.arg_names)
         _logger.debug(func_ir.dump_to_string())
 
-        # post process the IR to rewrite opcodes/byte sequences that are too
+        # post process（后期处理） the IR to rewrite opcodes/byte sequences that are too
         # involved to risk handling as part of direct interpretation
-        peepholes = []
+        peepholes = []  # 猫眼
         if PYVERSION in [(3, 9), (3, 10)]:
             peepholes.append(peep_hole_list_to_tuple)
         peepholes.append(peep_hole_delete_with_exit)
@@ -1346,6 +1347,7 @@ class Interpreter(object):
             peepholes.append(peep_hole_call_function_ex_to_call_function_kw)
             peepholes.append(peep_hole_fuse_dict_add_updates)
 
+        # exec the peep_hole_* funcs
         post_processed_ir = self.post_process(peepholes, func_ir)
         return post_processed_ir
 

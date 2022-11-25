@@ -3,6 +3,7 @@ from abc import abstractmethod, ABCMeta
 from collections import namedtuple, OrderedDict
 import inspect
 from pprint import pformat
+import pdb
 
 
 from numba.core.compiler_lock import global_compiler_lock
@@ -349,6 +350,7 @@ class PassManager(object):
 
         # walk the passes and run them
         for idx, (pss, pass_desc) in enumerate(self.passes):
+            pdb.set_trace()
             try:
                 event("-- %s" % pass_desc)
                 pass_inst = _pass_registry.get(pss).pass_inst

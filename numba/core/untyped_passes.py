@@ -2,6 +2,7 @@ from collections import defaultdict, namedtuple
 from contextlib import contextmanager
 from copy import deepcopy, copy
 import warnings
+import pdb
 
 from numba.core.compiler_machinery import (FunctionPass, AnalysisPass,
                                            SSACompliantMixin, register_pass)
@@ -70,7 +71,7 @@ class ExtractByteCode(FunctionPass):
 
 
 @register_pass(mutates_CFG=True, analysis_only=False)
-class TranslateByteCode(FunctionPass):
+class TranslateByteCode(FunctionPass):  # 0: do the interpret to get original IR
     _name = "translate_bytecode"
 
     def __init__(self):
@@ -83,13 +84,14 @@ class TranslateByteCode(FunctionPass):
         func_id = state['func_id']
         bc = state['bc']
         interp = interpreter.Interpreter(func_id)  # interpreter.py:1280 init interpreter
-        func_ir = interp.interpret(bc)  # interpreter.py:1299
+        func_ir = interp.interpret(bc)  # interpreter.py:1299: get the bytecode, simulate execution, 
+        # get the IR and post process the IR
         state["func_ir"] = func_ir
         return True
 
 
 @register_pass(mutates_CFG=True, analysis_only=False)
-class FixupArgs(FunctionPass):
+class FixupArgs(FunctionPass):  # 1: check the arg number and pass in number is matched?
     _name = "fixup_args"
 
     def __init__(self):
@@ -109,16 +111,17 @@ class FixupArgs(FunctionPass):
 
 
 @register_pass(mutates_CFG=True, analysis_only=False)
-class IRProcessing(FunctionPass):
+class IRProcessing(FunctionPass):  # 2
     _name = "ir_processing"
 
     def __init__(self):
         FunctionPass.__init__(self)
 
     def run_pass(self, state):
+        # pdb.set_trace()
         func_ir = state['func_ir']
         post_proc = postproc.PostProcessor(func_ir)
-        post_proc.run()
+        post_proc.run()  # 规范化CFG，计算var的lifetime并插入相应的del指令
 
         if config.DEBUG or config.DUMP_IR:
             name = func_ir.func_id.func_qualname
@@ -226,6 +229,7 @@ class GenericRewrites(FunctionPass):
         Perform any intermediate representation rewrites before type
         inference.
         """
+        pdb.set_trace()
         assert state.func_ir
         msg = ('Internal error in pre-inference rewriting '
                'pass encountered during compilation of '
@@ -236,7 +240,7 @@ class GenericRewrites(FunctionPass):
 
 
 @register_pass(mutates_CFG=True, analysis_only=False)
-class WithLifting(FunctionPass):
+class WithLifting(FunctionPass):  # 3
     _name = "with_lifting"
 
     def __init__(self):
@@ -1588,6 +1592,7 @@ class LiteralPropagationSubPipelinePass(FunctionPass):
             if found:
                 break
         if not found:
+            # pdb.set_trace()
             return False
 
         # run as subpipeline
@@ -1621,6 +1626,7 @@ class LiteralUnroll(FunctionPass):
     def run_pass(self, state):
         # Determine whether to even attempt this pass... if there's no
         # `literal_unroll` as a global or as a freevar then just skip.
+        pdb.set_trace()
         found = False
         func_ir = state.func_ir
         for blk in func_ir.blocks.values():

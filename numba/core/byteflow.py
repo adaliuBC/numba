@@ -96,7 +96,7 @@ class Flow(object):
         first_encounter = UniqueDict()
         # Loop over each pending state at a initial PC.
         # Each state is tracing a basic block
-        while runner.pending:
+        while runner.pending:  # if there is still state pending - bfs traversal
             _logger.debug("pending: %s", runner.pending)
             state = runner.pending.popleft()
             if state not in runner.finished:

@@ -21,6 +21,7 @@ class DetectStaticBinops(Rewrite):
                 if (expr.fn in self.rhs_operators
                     and expr.static_rhs is ir.UNDEFINED):
                     self.static_rhs[expr] = func_ir.infer_constant(expr.rhs)
+                    # infer_constant: return val if const, else Error
             except errors.ConstantInferenceError:
                 continue
 
